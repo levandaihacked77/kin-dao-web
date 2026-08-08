@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kín Đáo — Chọn đúng, giao lặng lẽ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,440;0,9..144,560;0,9..144,650;1,9..144,440&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F8F3F1;
+    --paper-alt:#F0E6E2;
+    --ink:#20171A;
+    --ink-soft:#544548;
+    --wine:#6B2737;
+    --wine-deep:#3E141E;
+    --wine-glow:rgba(107,39,55,0.14);
+    --gold:#C9A66B;
+    --gold-soft:#E4D2AC;
+    --mauve:#8B7B7E;
+    --line:#E4D5D1;
+    --ok:#4C6B4A;
+    --radius:3px;
+    --shadow-sm: 0 1px 2px rgba(32,23,26,0.06);
+    --shadow-md: 0 8px 24px -8px rgba(62,20,30,0.18);
+    --shadow-lg: 0 24px 60px -20px rgba(62,20,30,0.28);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Public Sans', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+  /* film-grain texture overlay */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:200; opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;} }
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 32px;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:500; letter-spacing:-0.015em; color:var(--wine-deep);}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--wine); display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::before{content:""; width:22px; height:1px; background:linear-gradient(90deg,var(--gold),transparent);}
+
+  /* reveal on scroll */
+  .reveal{opacity:0; transform:translateY(22px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- Age gate ---------- */
+  #agegate{
+    position:fixed; inset:0; z-index:999; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(ellipse at 50% 20%, #2C1019 0%, #180A0E 70%);
+  }
+  #agegate .box{max-width:400px; text-align:center;}
+  #agegate .mark{width:38px; height:38px; margin:0 auto 22px; opacity:.85;}
+  #agegate h2{color:var(--paper); font-size:28px; margin-bottom:14px; font-weight:440;}
+  #agegate p{color:#B79FA3; font-size:14px; margin-bottom:30px; line-height:1.7;}
+  #agegate .btnrow{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .agebtn{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; letter-spacing:.05em;
+    padding:14px 24px; border-radius:var(--radius); cursor:pointer; border:1px solid var(--gold-soft);
+    background:transparent; color:var(--paper); transition:all .25s ease;
+  }
+  .agebtn:hover{background:rgba(201,166,107,0.1);}
+  .agebtn.primary{background:linear-gradient(135deg,var(--gold),#B8895A); color:#241118; border-color:transparent; box-shadow:0 8px 20px -6px rgba(201,166,107,0.5);}
+  .agebtn.primary:hover{transform:translateY(-1px); box-shadow:0 12px 26px -6px rgba(201,166,107,0.6);}
+  body.locked{overflow:hidden;}
+
+  /* ---------- Nav ---------- */
+  header{position:sticky; top:0; z-index:50; background:rgba(248,243,241,0.85); backdrop-filter:blur(12px) saturate(140%); border-bottom:1px solid var(--line);}
+  .progressbar{position:absolute; bottom:-1px; left:0; height:2px; background:linear-gradient(90deg,var(--gold),var(--wine)); width:0%; transition:width .1s linear;}
+  nav{max-width:1120px; margin:0 auto; padding:20px 32px; display:flex; align-items:center; justify-content:space-between;}
+  .logo{font-family:'Fraunces', serif; font-size:21px; letter-spacing:-0.01em; color:var(--wine-deep); display:flex; align-items:center; gap:8px;}
+  .logo .dot{width:6px; height:6px; border-radius:50%; background:var(--gold); display:inline-block;}
+  nav .links{display:flex; gap:32px; font-size:13.5px; color:var(--ink-soft); font-weight:500;}
+  nav .links a{text-decoration:none; position:relative; padding-bottom:3px;}
+  nav .links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--wine); transition:width .25s ease;}
+  nav .links a:hover::after{width:100%;}
+  nav .links a:hover{color:var(--wine);}
+  @media (max-width:760px){ nav .links{display:none;} }
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative; padding:104px 0 92px; overflow:hidden;}
+  .hero::before{
+    content:""; position:absolute; top:-200px; right:-160px; width:640px; height:640px; border-radius:50%;
+    background:radial-gradient(circle, var(--wine-glow) 0%, transparent 70%); pointer-events:none;
+  }
+  .hero::after{
+    content:""; position:absolute; bottom:-260px; left:-200px; width:520px; height:520px; border-radius:50%;
+    background:radial-gradient(circle, rgba(201,166,107,0.12) 0%, transparent 70%); pointer-events:none;
+  }
+  .hero .grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:64px; align-items:center; position:relative;}
+  @media (max-width:880px){ .hero .grid{grid-template-columns:1fr;} }
+  .hero h1{font-size:clamp(36px, 5vw, 58px); line-height:1.06; margin:20px 0 24px;}
+  .hero h1 em{color:var(--wine); font-style:italic; font-weight:440; position:relative; white-space:nowrap;}
+  .hero h1 em::after{
+    content:""; position:absolute; left:-2%; right:-2%; bottom:6px; height:0.32em; background:var(--gold-soft);
+    z-index:-1; opacity:.55; transform:skewX(-6deg);
+  }
+  .hero p.lead{font-size:17.5px; color:var(--ink-soft); max-width:480px; margin-bottom:32px;}
+  .cta-row{display:flex; gap:16px; flex-wrap:wrap; align-items:center;}
+  .btn{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; letter-spacing:0.04em;
+    padding:16px 28px; border-radius:var(--radius); text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--wine); transition:transform .2s ease, box-shadow .2s ease; position:relative; overflow:hidden;
+  }
+  .btn.primary{background:linear-gradient(135deg, var(--wine), var(--wine-deep)); color:var(--paper); box-shadow:var(--shadow-md);}
+  .btn.primary:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg);}
+  .btn.ghost{color:var(--wine); background:transparent;}
+  .btn.ghost:hover{background:rgba(107,39,55,0.06);}
+  .trustline{font-size:13px; color:var(--mauve); margin-top:22px; display:flex; gap:9px; align-items:center;}
+  .trustline svg{width:15px; height:15px; flex-shrink:0; color:var(--wine);}
+
+  /* signature: 3D-ish plain box */
+  .boxwrap{position:relative; display:flex; align-items:center; justify-content:center; perspective:1000px;}
+  .boxwrap svg{width:100%; max-width:380px; height:auto; filter:drop-shadow(0 30px 40px -18px rgba(62,20,30,0.35));}
+  .flap{transform-origin:50% 100%; transition:transform 1.3s cubic-bezier(.16,.9,.2,1);}
+  .boxwrap .flap-l{transform:rotateX(52deg);}
+  .boxwrap .flap-r{transform:rotateX(52deg);}
+  .boxwrap.open .flap-l, .boxwrap.open .flap-r{transform:rotateX(0deg);}
+  .stamp{font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.1em; fill:var(--mauve);}
+  .float-badge{
+    position:absolute; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:10px 14px; font-family:'IBM Plex Mono', monospace; font-size:11px; box-shadow:var(--shadow-md);
+    display:flex; align-items:center; gap:8px; animation:float 5s ease-in-out infinite;
+  }
+  .float-badge svg{width:14px; height:14px; color:var(--ok);}
+  .float-badge.b1{top:6%; left:-4%;}
+  .float-badge.b2{bottom:10%; right:-2%; animation-delay:1.4s;}
+  @keyframes float{0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);}}
+  @media (max-width:640px){ .float-badge{display:none;} }
+
+  /* ---------- Section shell ---------- */
+  section{padding:88px 0; position:relative;}
+  .section-head{max-width:600px; margin-bottom:48px;}
+  .section-head h2{font-size:clamp(28px,3.2vw,38px); margin-top:16px;}
+  .alt{background:linear-gradient(180deg, var(--paper-alt), var(--paper));}
+
+  /* ---------- Comparison table ---------- */
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow-md); background:var(--paper);}
+  table{border-collapse:collapse; width:100%; min-width:720px;}
+  thead th{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--mauve); padding:18px 20px; border-bottom:1px solid var(--line); white-space:nowrap;
+    background:linear-gradient(180deg, rgba(240,230,226,0.6), transparent);
+  }
+  tbody td{padding:20px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .2s ease;}
+  tbody tr:hover{background:rgba(107,39,55,0.035);}
+  .prod-row{display:flex; gap:14px; align-items:flex-start;}
+  .prod-icon{
+    width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, var(--wine-glow), transparent);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .prod-icon svg{width:17px; height:17px; color:var(--wine);}
+  .prod-name{font-family:'Fraunces', serif; font-size:16px; margin-bottom:3px; color:var(--ink);}
+  .prod-tag{font-size:11.5px; color:var(--wine); font-family:'IBM Plex Mono', monospace; letter-spacing:.03em;}
+  .stars{display:inline-flex; gap:2px;}
+  .stars svg{width:13px; height:13px;}
+  .stars svg.on{color:var(--gold); fill:var(--gold);}
+  .stars svg.off{color:var(--line); fill:var(--line);}
+  .price{font-family:'IBM Plex Mono', monospace; font-weight:500;}
+  .minibtn{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:.04em; color:var(--wine); text-decoration:none;
+    white-space:nowrap; display:inline-flex; align-items:center; gap:5px; padding:7px 12px; border:1px solid var(--line);
+    border-radius:20px; transition:all .2s ease;
+  }
+  .minibtn:hover{background:var(--wine); color:var(--paper); border-color:var(--wine); transform:translateX(2px);}
+
+  /* ---------- Review cards ---------- */
+  .reviews{display:flex; flex-direction:column; gap:22px;}
+  .rcard{
+    background:var(--paper); padding:40px; display:grid; grid-template-columns:auto 1fr auto; gap:28px; align-items:start;
+    border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow-sm); transition:box-shadow .3s ease, transform .3s ease;
+    position:relative; overflow:hidden;
+  }
+  .rcard::before{content:""; position:absolute; top:0; left:0; width:3px; height:100%; background:linear-gradient(180deg,var(--gold),var(--wine));}
+  .rcard:hover{box-shadow:var(--shadow-lg); transform:translateY(-3px);}
+  @media (max-width:700px){ .rcard{grid-template-columns:1fr; padding:28px;} .rcard .rnum{display:none;} }
+  .rnum{font-family:'Fraunces', serif; font-style:italic; font-weight:340; font-size:40px; color:var(--gold-soft); line-height:1;}
+  .rcard h3{font-size:21px; margin-bottom:8px;}
+  .rmeta{display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;}
+  .pill{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.05em; padding:5px 11px;
+    border:1px solid var(--line); border-radius:20px; color:var(--ink-soft);
+  }
+  .pill.good{border-color:var(--ok); color:var(--ok); background:rgba(76,107,74,0.06);}
+  .rcard p{color:var(--ink-soft); font-size:14.5px; max-width:580px; margin-bottom:18px;}
+  .prosoncons{display:flex; gap:32px; flex-wrap:wrap; font-size:13.5px; margin-bottom:8px;}
+  .prosoncons div{min-width:190px;}
+  .prosoncons .h{font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.07em; color:var(--mauve); margin-bottom:8px; text-transform:uppercase;}
+  .prosoncons ul{list-style:none;}
+  .prosoncons li{margin-bottom:6px; color:var(--ink-soft); padding-left:18px; position:relative;}
+  .prosoncons li::before{content:"—"; position:absolute; left:0; color:var(--gold);}
+  .rcard .cta-col{display:flex; flex-direction:column; align-items:flex-end; gap:10px; min-width:150px;}
+  @media (max-width:700px){ .rcard .cta-col{align-items:flex-start; flex-direction:row; justify-content:space-between; width:100%; margin-top:8px;} }
+  .rcard .price-big{font-family:'IBM Plex Mono', monospace; font-size:19px; font-weight:500; color:var(--wine-deep);}
+
+  /* ---------- Trust strip ---------- */
+  .trust-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:760px){ .trust-strip{grid-template-columns:1fr;} }
+  .trust-item{background:var(--paper); padding:32px; border:1px solid var(--line); border-radius:8px; transition:transform .3s ease, box-shadow .3s ease;}
+  .trust-item:hover{transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:transparent;}
+  .trust-item .icnwrap{
+    width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--wine),var(--wine-deep));
+    display:flex; align-items:center; justify-content:center; margin-bottom:16px; box-shadow:var(--shadow-sm);
+  }
+  .trust-item svg{width:19px; height:19px; color:var(--gold-soft);}
+  .trust-item h4{font-family:'Fraunces', serif; font-size:16.5px; margin-bottom:8px; color:var(--ink);}
+  .trust-item p{font-size:13.5px; color:var(--ink-soft); line-height:1.65;}
+
+  /* ---------- FAQ ---------- */
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-item summary{
+    padding:22px 4px; cursor:pointer; font-family:'Fraunces', serif; font-size:16.5px; list-style:none;
+    display:flex; justify-content:space-between; align-items:center; color:var(--ink); transition:color .2s ease;
+  }
+  .faq-item summary:hover{color:var(--wine);}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary .plus{
+    font-family:'IBM Plex Mono', monospace; font-size:16px; color:var(--wine); width:22px; height:22px;
+    border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .25s ease;
+  }
+  .faq-item[open] summary .plus{transform:rotate(135deg); background:var(--wine); color:var(--paper); border-color:var(--wine);}
+  .faq-item .a{padding:0 34px 24px 4px; color:var(--ink-soft); font-size:14.5px; max-width:640px;}
+
+  /* ---------- Footer ---------- */
+  footer{background:linear-gradient(180deg,#20141A,#160D11); color:#C9BFC1; padding:60px 0 34px; font-size:13px;}
+  footer .fgrid{display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:32px;}
+  footer h5{color:var(--paper); font-family:'Fraunces', serif; font-size:18px; margin-bottom:12px; font-style:italic;}
+  footer .disclosure{border-top:1px solid #3A2A30; padding-top:24px; font-size:12px; line-height:1.75; color:#8B7B7E;}
+  footer .disclosure b{color:#C9BFC1;}
+</style>
+</head>
+<body class="locked">
+
+<div id="agegate">
+  <div class="box">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="#C9A66B" stroke-width="1.3"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M7 8V6a5 5 0 0110 0v2"/></svg>
+    <h2>Xác nhận độ tuổi</h2>
+    <p>Trang này giới thiệu sản phẩm chăm sóc sức khỏe dành cho người trưởng thành.<br>Bạn cần từ 18 tuổi trở lên để tiếp tục.</p>
+    <div class="btnrow">
+      <button class="agebtn primary" onclick="document.getElementById('agegate').style.display='none'; document.body.classList.remove('locked');">Tôi trên 18 tuổi</button>
+      <button class="agebtn" onclick="window.location.href='https://google.com'">Thoát</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <nav>
+    <div class="logo"><span class="dot"></span>Kín Đáo<em style="font-style:italic;color:var(--wine)">.</em></div>
+    <div class="links">
+      <a href="#sosanh">So sánh</a>
+      <a href="#review">Đánh giá</a>
+      <a href="#tin-cay">Vì sao tin</a>
+      <a href="#faq">Hỏi đáp</a>
+    </div>
+  </nav>
+  <div class="progressbar" id="progressbar"></div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="grid">
+      <div class="reveal in">
+        <div class="eyebrow">Hướng dẫn chọn mua — cập nhật 2026</div>
+        <h1>Chọn đúng loại,<br><em>không ai cần biết</em> ngoài bạn.</h1>
+        <p class="lead">Mình đã dùng thử và so sánh các dòng phổ biến nhất trên thị trường — để bạn chọn nhanh, mua đúng, và nhận hàng mà không ai đoán được bên trong là gì.</p>
+        <div class="cta-row">
+          <a href="#sosanh" class="btn primary">Xem bảng so sánh →</a>
+          <a href="#review" class="btn ghost">Đọc đánh giá chi tiết</a>
+        </div>
+        <div class="trustline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M7 8V6a5 5 0 0110 0v2"/></svg>
+          Đóng gói kín, không ghi tên sản phẩm ngoài hộp
+        </div>
+      </div>
+      <div class="boxwrap" id="boxSig">
+        <div class="float-badge b1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Hộp trung tính</div>
+        <div class="float-badge b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>2–4 ngày</div>
+        <svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="boxfill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F1E8E5"/>
+              <stop offset="100%" stop-color="#E4D2AC" stop-opacity="0.35"/>
+            </linearGradient>
+          </defs>
+          <rect x="40" y="90" width="220" height="140" fill="url(#boxfill)" stroke="#6B2737" stroke-width="1.5"/>
+          <line x1="40" y1="150" x2="260" y2="150" stroke="#C9A66B" stroke-width="2"/>
+          <line x1="150" y1="90" x2="150" y2="230" stroke="#C9A66B" stroke-width="2"/>
+          <g class="flap flap-l" style="transform-box:fill-box;">
+            <polygon points="40,90 150,90 40,20" fill="#F8F3F1" stroke="#6B2737" stroke-width="1.5"/>
+          </g>
+          <g class="flap flap-r" style="transform-box:fill-box;">
+            <polygon points="260,90 150,90 260,20" fill="#EFE3DF" stroke="#6B2737" stroke-width="1.5"/>
+          </g>
+          <text x="150" y="205" text-anchor="middle" class="stamp">KHÔNG GHI NHÃN — HÀNG DỄ VỠ</text>
+          <text x="150" y="220" text-anchor="middle" class="stamp">GIAO TIÊU CHUẨN, 2–4 NGÀY</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sosanh" class="alt">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Bảng so sánh nhanh</div>
+      <h2>4 dòng được hỏi nhiều nhất</h2>
+    </div>
+    <div class="table-scroll reveal">
+      <table>
+        <thead>
+          <tr><th>Sản phẩm</th><th>Phù hợp với</th><th>Đánh giá</th><th>Giá tham khảo</th><th>Liên kết</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="prod-row"><div class="prod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div><div><div class="prod-name">Durex Fetherlite</div><div class="prod-tag">Siêu mỏng</div></div></div></td>
+            <td>Người mới dùng, ưu tiên cảm giác tự nhiên</td>
+            <td><span class="stars">★★★★☆</span></td>
+            <td class="price">~135.000₫ / hộp 12</td>
+            <td><a class="minibtn" href="#" data-affiliate-slot="fetherlite">Xem giá →</a></td>
+          </tr>
+          <tr>
+            <td><div class="prod-row"><div class="prod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2C7 6 4 10 4 14a8 8 0 0016 0c0-4-3-8-8-12z"/></svg></div><div><div class="prod-name">Durex Extra Safe</div><div class="prod-tag">Độ dày tiêu chuẩn+</div></div></div></td>
+            <td>Ưu tiên an tâm, độ bền cao</td>
+            <td><span class="stars">★★★★★</span></td>
+            <td class="price">~145.000₫ / hộp 12</td>
+            <td><a class="minibtn" href="#" data-affiliate-slot="extrasafe">Xem giá →</a></td>
+          </tr>
+          <tr>
+            <td><div class="prod-row"><div class="prod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></div><div><div class="prod-name">Durex Pleasure Me</div><div class="prod-tag">Có gân & chấm nổi</div></div></div></td>
+            <td>Cặp đôi muốn tăng trải nghiệm</td>
+            <td><span class="stars">★★★★☆</span></td>
+            <td class="price">~150.000₫ / hộp 10</td>
+            <td><a class="minibtn" href="#" data-affiliate-slot="pleasureme">Xem giá →</a></td>
+          </tr>
+          <tr>
+            <td><div class="prod-row"><div class="prod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21c-4-3-8-7-8-11a8 8 0 0116 0c0 4-4 8-8 11z"/></svg></div><div><div class="prod-name">Durex Sensitivo</div><div class="prod-tag">Da nhạy cảm</div></div></div></td>
+            <td>Người dễ kích ứng, cần chất liệu dịu</td>
+            <td><span class="stars">★★★★☆</span></td>
+            <td class="price">~140.000₫ / hộp 12</td>
+            <td><a class="minibtn" href="#" data-affiliate-slot="sensitivo">Xem giá →</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Đánh giá chi tiết</div>
+      <h2>Dùng thật, viết thật</h2>
+    </div>
+    <div class="reviews">
+
+      <div class="rcard reveal">
+        <div class="rnum">01</div>
+        <div>
+          <h3>Durex Fetherlite — mỏng đến mức quên mình đang dùng</h3>
+          <div class="rmeta"><span class="pill good">Bán chạy nhất</span><span class="pill">Cho người mới</span></div>
+          <p>Đây là dòng nhẹ nhàng nhất trong các loại phổ biến — phù hợp nếu bạn ưu tiên cảm giác tự nhiên hơn là các tính năng phụ. Chất liệu latex mỏng nhưng vẫn giữ độ an toàn tiêu chuẩn quốc tế.</p>
+          <div class="prosoncons">
+            <div><div class="h">Ưu điểm</div><ul><li>Cảm giác tự nhiên, ít gây vướng</li><li>Không mùi cao su nồng</li><li>Giá hợp lý cho hộp lớn</li></ul></div>
+            <div><div class="h">Cân nhắc</div><ul><li>Mỏng hơn nên cần thao tác cẩn thận</li><li>Không phù hợp nếu ưu tiên độ dày tối đa</li></ul></div>
+          </div>
+        </div>
+        <div class="cta-col">
+          <div class="price-big">~135.000₫</div>
+          <a class="btn primary" href="#" data-affiliate-slot="fetherlite-detail">Xem gian hàng →</a>
+        </div>
+      </div>
+
+      <div class="rcard reveal">
+        <div class="rnum">02</div>
+        <div>
+          <h3>Durex Extra Safe — chọn khi ưu tiên an tâm</h3>
+          <div class="rmeta"><span class="pill good">Đánh giá cao nhất</span><span class="pill">Độ bền tốt</span></div>
+          <p>Dày hơn mức tiêu chuẩn một chút, đây là lựa chọn được nhắc đến nhiều nhất khi ai đó hỏi mình "loại nào chắc chắn nhất". Phù hợp cho người mới bắt đầu tìm hiểu và muốn giảm lo lắng.</p>
+          <div class="prosoncons">
+            <div><div class="h">Ưu điểm</div><ul><li>Độ dày tăng cảm giác an toàn</li><li>Ít rủi ro rách hơn khi thao tác</li><li>Phù hợp dùng lâu dài, ổn định</li></ul></div>
+            <div><div class="h">Cân nhắc</div><ul><li>Không mỏng nhẹ bằng dòng Fetherlite</li></ul></div>
+          </div>
+        </div>
+        <div class="cta-col">
+          <div class="price-big">~145.000₫</div>
+          <a class="btn primary" href="#" data-affiliate-slot="extrasafe-detail">Xem gian hàng →</a>
+        </div>
+      </div>
+
+      <div class="rcard reveal">
+        <div class="rnum">03</div>
+        <div>
+          <h3>Durex Sensitivo — cho làn da dễ phản ứng</h3>
+          <div class="rmeta"><span class="pill">Da nhạy cảm</span></div>
+          <p>Nếu bạn từng bị kích ứng nhẹ với loại thông thường, đây là dòng đáng thử trước — chất liệu được xử lý dịu hơn, giảm khả năng gây khó chịu ở người có làn da nhạy cảm.</p>
+          <div class="prosoncons">
+            <div><div class="h">Ưu điểm</div><ul><li>Ít gây kích ứng hơn dòng thường</li><li>Vẫn giữ độ an toàn tiêu chuẩn</li></ul></div>
+            <div><div class="h">Cân nhắc</div><ul><li>Giá nhỉnh hơn dòng cơ bản</li></ul></div>
+          </div>
+        </div>
+        <div class="cta-col">
+          <div class="price-big">~140.000₫</div>
+          <a class="btn primary" href="#" data-affiliate-slot="sensitivo-detail">Xem gian hàng →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="tin-cay" class="alt">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Vì sao đọc bài này</div>
+      <h2>Mình không giấu gì trong cách viết</h2>
+    </div>
+    <div class="trust-strip">
+      <div class="trust-item reveal">
+        <div class="icnwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>
+        <h4>Minh bạch hoa hồng</h4>
+        <p>Một số liên kết trong trang là liên kết tiếp thị liên kết — nếu bạn mua qua đây, mình có thể nhận một khoản hoa hồng nhỏ, không phát sinh thêm chi phí cho bạn.</p>
+      </div>
+      <div class="trust-item reveal">
+        <div class="icnwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M7 8V6a5 5 0 0110 0v2"/></svg></div>
+        <h4>Giao hàng kín đáo</h4>
+        <p>Sản phẩm được đóng gói theo tiêu chuẩn của sàn thương mại điện tử — không ghi tên sản phẩm ngoài hộp.</p>
+      </div>
+      <div class="trust-item reveal">
+        <div class="icnwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h4>Cập nhật định kỳ</h4>
+        <p>Giá và thông tin sản phẩm được rà soát lại theo thời gian để đảm bảo phản ánh đúng thị trường hiện tại.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Hỏi đáp</div>
+      <h2>Vài câu hay được hỏi</h2>
+    </div>
+    <div class="reveal">
+      <details class="faq-item" open>
+        <summary>Mua trên link này có mất thêm phí gì không?<span class="plus">+</span></summary>
+        <div class="a">Không. Giá bạn thấy trên gian hàng là giá cuối cùng, hoa hồng (nếu có) do sàn trả cho người giới thiệu, không cộng thêm vào giá bạn trả.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Đóng gói có ghi tên sản phẩm bên ngoài không?<span class="plus">+</span></summary>
+        <div class="a">Không. Các sàn lớn hiện đóng gói trung tính theo mặc định cho nhóm sản phẩm này — hộp ngoài không ghi tên hay hình ảnh sản phẩm bên trong.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Làm sao biết chọn đúng kích cỡ / loại?<span class="plus">+</span></summary>
+        <div class="a">Nếu chưa chắc, nên bắt đầu với dòng tiêu chuẩn (như Extra Safe) trước — dễ dùng và ít rủi ro không vừa hơn các dòng đặc thù.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <h5>Kín Đáo.</h5>
+        <p style="max-width:300px; color:#8B7B7E;">Trang chia sẻ kinh nghiệm chọn mua sản phẩm chăm sóc sức khỏe cá nhân, dành cho người từ 18 tuổi trở lên.</p>
+      </div>
+    </div>
+    <div class="disclosure">
+      <b>Lưu ý:</b> Nội dung trên trang mang tính tham khảo, không thay thế tư vấn y tế chuyên môn. Trang có chứa liên kết tiếp thị liên kết — chúng tôi có thể nhận hoa hồng khi bạn mua hàng qua các liên kết này. Sản phẩm chỉ dành cho người từ 18 tuổi trở lên.
+    </div>
+  </div>
+</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('boxSig').classList.add('open'), 400);
+  });
+
+  // scroll progress bar
+  const bar = document.getElementById('progressbar');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.15});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
